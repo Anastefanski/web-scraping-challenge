@@ -109,31 +109,6 @@ def scrape():
 
     print("JPL Featured Space Image: Scraping Complete!")
 
-    # *****************************************************************************************************************************
-    # Scraping Mars Weather Tweet
-    # *****************************************************************************************************************************
-    
-    MarsWeather_url = 'https://twitter.com/marswxreport'
-
-    print("Scraping Mars Weather's Twitter Account...")
-
-    # --- visit the Mars Weather twitter account ---
-    browser.visit(MarsWeather_url)
-    time.sleep(5)
-
-    # --- create HTML object ---
-    html = browser.html
-
-    # --- parse HTML with BeautifulSoup ---
-    soup = BeautifulSoup(html, 'html.parser')
-
-    # --- save the latest tweet in a variable (found in the text of the first element <span> under the <div> tag with lang="en" ---
-    tweet = soup.find_all('div', lang='en')[0].text
-
-    # --- clean up the tweet (remove newline) ---
-    latest_tweet = tweet.replace('\n', '')
-        
-    print("Mars Weather: Scraping Complete!")
 
     # *****************************************************************************************************************************
     #  Scraping Mars Facts
