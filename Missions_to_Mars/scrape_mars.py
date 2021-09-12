@@ -46,7 +46,7 @@ def scrape():
     #Mars Facts
     browser.visit('https://galaxyfacts-mars.com')
     facts=pd.read_html('https://galaxyfacts-mars.com')
-    facts
+    print(facts)
     mars_facts= facts[1]
     mars_facts
     mars_fact_table = mars_facts.to_html()
@@ -75,15 +75,15 @@ def scrape():
             
     hemisphere_image_urls
 
-    mars_html = {
+    mars_post = {
     "news_title":news_title,
-    "news_p":news_p,
-    "featured_img_url":featured_image_url,
-    "facts":mars_fact_table,
-    "hemispheres":hemisphere_image_urls
+    "news_p":news_p
+    #"featured_img_url":featured_image_url,
+    #"facts":mars_fact_table,
+    #"hemispheres":hemisphere_image_urls
     }
-
-    mars_html
+    print("////////////////////////////////////////////")
+    print(mars_post)
 
     browser.quit()
 
@@ -96,8 +96,8 @@ def scrape():
 
     facts = db.facts
 
-    db.facts.drop()
+    
 
-    post = mars_html
+   
 
-    facts.insert_one(post)
+    facts.insert_many([mars_post])
