@@ -2,102 +2,92 @@
 # import necessary libraries
 import os
 from splinter import Browser
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup as soup
 import pandas as pd
-import requests
-import pymongo
-from flask import Flask, render_template, redirect
-from flask_pymongo import PyMongo
-import time
+import datetime as dt
 from webdriver_manager.chrome import ChromeDriverManager
 
-def scrape():
+def scrape_all():
 
     executable_path = {'executable_path': ChromeDriverManager().install()}
-    browser = Browser('chrome', **executable_path, headless=False)
+    browser = Browser('chrome', **executable_path, headless=True)
 
-    #NASA Mars News
-    browser.visit('https://redplanetscience.com/')
-    time.sleep(5)
+    news_title, news_paragraph = mars_news(browser)
 
-    news_html = browser.html
-    soup = BeautifulSoup(news_html, 'html.parser')
-    results = soup.find_all('div', class_='list_text')
-
-    for result in results:
-            news_title = result.find('div', class_='content_title').text
-            news_p = result.find('div', class_='article_teaser_body').text
-            
-            print('-----------------')
-            print(news_title)
-            print(news_p)
-
-
-    #JPL Mars Space Images below
-    browser.visit('https://spaceimages-mars.com/')
-    baseurl = 'https://spaceimages-mars.com/'
-    browser.links.find_by_partial_text('FULL IMAGE').click()
-    image_html = browser.html
-    image_soup = BeautifulSoup(image_html, 'html.parser')
-    image_results = image_soup.find('img', class_='fancybox-image')['src']
-    featured_image_url = baseurl + image_results
-    featured_image_url 
-
-    #Mars Facts
-    browser.visit('https://galaxyfacts-mars.com')
-    facts=pd.read_html('https://galaxyfacts-mars.com')
-    print(facts)
-    mars_facts= facts[1]
-    mars_facts
-    mars_fact_table = mars_facts.to_html()
-    print(mars_fact_table)
-
-    #Mars Hemispheres
-    url = 'https://marshemispheres.com/'
-    browser.visit(url)
-    hemispheres_html = browser.html
-    soup = BeautifulSoup(hemispheres_html, 'html.parser')
-    hemisphere_image_urls = []
-    hemispheres = soup.find_all('div', class_='item')
-
-    for hemisphere in hemispheres:
-        hemisphere_header = hemisphere.h3.text.strip()
-        hemisphere_url = hemisphere.a['href']
-        browser.visit(url + hemisphere_url)
-        hemisphere_html = browser.html
-        hemisphere_soup = BeautifulSoup(hemisphere_html, 'html.parser')
-        hemisphere_finder = hemisphere_soup.find('div', id='wide-image')
-        hemisphere_finder2 = hemisphere_finder.find('a', target='_blank')['href']
-        hemisphere_image_url = url +  hemisphere_finder2
-        hemisphere_image_urls.append({"title":hemisphere_header, "img_url":hemisphere_image_url})
-        browser.links.find_by_partial_text('Back').click()
-        time.sleep(1)
-            
-    hemisphere_image_urls
-
-    mars_post = {
-    "news_title":news_title,
-    "news_p":news_p
-    #"featured_img_url":featured_image_url,
-    #"facts":mars_fact_table,
-    #"hemispheres":hemisphere_image_urls
+    data = {
+        "news_title": news_title,
+        "news_paragraph": news_paragraph,
+        "featured_image": featured_image(browser), 
+        "facts": mars_facts(),
+        "hemispheres": hemispheres(browser), 
+        "last_modified": dt.datetime.now()
     }
-    print("////////////////////////////////////////////")
-    print(mars_post)
-
+    #NASA Mars News
     browser.quit()
+    return data
+def mars_news(browser):
+
+    url = 'https://redplanetscience.com'
+    browser.visit(url)
+
+    browser.is_element_present_by_css('div.list_text', wait_time=1)
+
+    html = browser.html
+    news_soup = soup(html, 'html.parser')
+
+    try:
+        slide_elem = news_soup.select_one('div.list_text')
+        news_title = slide_elem.find("div", class_= "contnet_title").get_text()
+        news_p = slide_elem.find("div", class_="article_teaser_body").get_text()
+
+    except AttributeError:
+        return news_title, news_p
+
+def featured_image(browser):
+
+    url ='https://spaceimages-mars.com'
+    browser.visit(url)
+
+# HTML Object
+	img_html = browser.html
+	img_soup = BeautifulSoup(img_html, "html.parser")
+
+	# Find image url to the full size
+	featured_image = img_soup.find("article")["style"].replace('background-image: url(','').replace(');', '')[1:-1]
+	
+	# Display url
+	main_url = "https://www.jpl.nasa.gov"
+	
+	# Connect website url with scrapped route
+	featured_image_url = main_url + featured_image
 
 
-    #Import to Mongo
-    conn = 'mongodb://localhost:27017'
-    client = pymongo.MongoClient(conn)
+	mars_info["featured_image_url"] = featured_image_url
 
-    db = client.mars_db
+ #Mars Facts
+ 
+def mars_facts():
+    try:
+        df = pd.read_html('https://galaxyfacts-mars.com')[0]
+    except BaseException:
+        return None
 
-    facts = db.facts
+    df.columns = ['Description', 'Mars', 'Earth']
+    df.set_index('Description', inplace =True)
+    return df.to_html(classes="table-table-striped")
 
-    
+def hemispheres(browser):
+    url = 'https://marshemispheres.com/'
+    browser.visit(url + 'index.html')
+
+    hemisphere_image_urls =[]
+
+    for i in range(4):
+        browser.find_by_css("a.product-item img")[i].click()
+        hemi_data = scrape_hemispheres(browser.html)
+        
+
+
+
 
    
-
-    facts.insert_many([mars_post])
