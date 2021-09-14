@@ -49,21 +49,21 @@ def featured_image(browser):
     browser.visit(url)
 
     # HTML Object
-	    img_html = browser.html
-	    img_soup = BeautifulSoup(img_html, "html.parser")
+	img_html = browser.html
+	img_soup = BeautifulSoup(img_html, "html.parser")
 
 	# Find image url to the full size
-	    featured_image = img_soup.find("article")["style"].replace('background-image: url(','').replace(');', '')[1:-1]
+	featured_image = img_soup.find("article")["style"].replace('background-image: url(','').replace(');', '')[1:-1]
 	
 	# Display url
-	    main_url = "https://www.jpl.nasa.gov"
+	main_url = "https://www.jpl.nasa.gov"
 	
 	# Connect website url with scrapped route
-	    featured_image_url = main_url + featured_image
+	featured_image_url = main_url + featured_image
 
 
 	#mars_info["featured_image_url"] = featured_image_url
-            return featured_image_url
+        return featured_image_url
  
  #Mars Facts
     def mars_facts():
@@ -92,16 +92,15 @@ def featured_image(browser):
 
     def scrape_hemisphere(text_html):
         hemisphere_soup = BeautifulSoup(text_html, "html.parser")
-    try:
-        title_text = hemisphere_soup.find('h2', class_ = 'title').get_text()
-        image_ref = hemisphere_soup.find('a', text = 'Sample').get('href')
-    except AttributeError:
-        title_text = None
-        image_ref = None
+        try:
+            title_text = hemisphere_soup.find('h2', class_ = 'title').get_text()
+            image_ref = hemisphere_soup.find('a', text = 'Sample').get('href')
+        except AttributeError:
+            title_text = None
+            image_ref = None
         
-        hemispheres = {"title" : title_text, "image_url" : image_ref}
-    return hemispheres 
+            hemispheres = {"title" : title_text, "image_url" : image_ref}
+        return hemispheres 
 
     if __name__ == '__main__' : 
         print(scrape_all())
-           
