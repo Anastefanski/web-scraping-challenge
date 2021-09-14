@@ -37,7 +37,7 @@ def mars_news(browser):
 
     try:
         slide_elem = news_soup.select_one('div.list_text')
-        news_title = slide_elem.find("div", class_= "contnet_title").get_text()
+        news_title = slide_elem.find("div", class_= "content_title").get_text()
         news_p = slide_elem.find("div", class_="article_teaser_body").get_text()
 
     except AttributeError:
@@ -48,7 +48,7 @@ def featured_image(browser):
     url ='https://spaceimages-mars.com'
     browser.visit(url)
 
-# HTML Object
+    # HTML Object
 	img_html = browser.html
 	img_soup = BeautifulSoup(img_html, "html.parser")
 
@@ -62,8 +62,9 @@ def featured_image(browser):
 	featured_image_url = main_url + featured_image
 
 
-	mars_info["featured_image_url"] = featured_image_url
-
+	#mars_info["featured_image_url"] = featured_image_url
+        return featured_image_url
+ 
  #Mars Facts
  
 def mars_facts():
@@ -77,17 +78,34 @@ def mars_facts():
     return df.to_html(classes="table-table-striped")
 
 def hemispheres(browser):
-    url = 'https://marshemispheres.com/'
-    browser.visit(url + 'index.html')
+        url = 'https://marshemispheres.com/'
+        browser.visit(url + 'index.html')
 
-    hemisphere_image_urls =[]
+        hemisphere_image_urls =[]
 
-    for i in range(4):
-        browser.find_by_css("a.product-item img")[i].click()
-        hemi_data = scrape_hemispheres(browser.html)
+        for i in range(4):
+            browser.find_by_css("a.product-item img")[i].click()
+            hemi_data = scrape_hemispheres(browser.html)
+            hemi_data['img_url'] = url + hemi_data['img_url']
+            hemisphere_image_urls.append(hemi_data)
+            browser.back()
+        return hemisphere_image_urls
+
+def scrape_hemisphere(text_html):
+    hemisphere_soup = BeautifulSoup(text_html, "html.parser")
+    try:
+        title_text = hemisphere_soup.find('h2', class_ = 'title').get_text()
+        image_ref = hemisphere_soup.find('a', text = 'Sample').get('href')
+    except AttributeError:
+        title_text = None
+        image_ref = None
         
+    hemispheres = {"title" : title_text, "image_url" : image_ref}
+    return hemispheres 
+
+if __name__ == '__main__' : 
+    print(scrape_all())
+            
 
 
 
-
-   
