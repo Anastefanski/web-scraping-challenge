@@ -49,35 +49,34 @@ def featured_image(browser):
     browser.visit(url)
 
     # HTML Object
-	img_html = browser.html
-	img_soup = BeautifulSoup(img_html, "html.parser")
+	    img_html = browser.html
+	    img_soup = BeautifulSoup(img_html, "html.parser")
 
 	# Find image url to the full size
-	featured_image = img_soup.find("article")["style"].replace('background-image: url(','').replace(');', '')[1:-1]
+	    featured_image = img_soup.find("article")["style"].replace('background-image: url(','').replace(');', '')[1:-1]
 	
 	# Display url
-	main_url = "https://www.jpl.nasa.gov"
+	    main_url = "https://www.jpl.nasa.gov"
 	
 	# Connect website url with scrapped route
-	featured_image_url = main_url + featured_image
+	    featured_image_url = main_url + featured_image
 
 
 	#mars_info["featured_image_url"] = featured_image_url
-        return featured_image_url
+            return featured_image_url
  
  #Mars Facts
- 
-def mars_facts():
-    try:
-        df = pd.read_html('https://galaxyfacts-mars.com')[0]
-    except BaseException:
-        return None
+    def mars_facts():
+        try:
+            df = pd.read_html('https://galaxyfacts-mars.com')[0]
+        except BaseException:
+            return None
 
-    df.columns = ['Description', 'Mars', 'Earth']
-    df.set_index('Description', inplace =True)
-    return df.to_html(classes="table-table-striped")
+        df.columns = ['Description', 'Mars', 'Earth']
+        df.set_index('Description', inplace =True)
+        return df.to_html(classes="table-table-striped")
 
-def hemispheres(browser):
+    def hemispheres(browser):
         url = 'https://marshemispheres.com/'
         browser.visit(url + 'index.html')
 
@@ -91,8 +90,8 @@ def hemispheres(browser):
             browser.back()
         return hemisphere_image_urls
 
-def scrape_hemisphere(text_html):
-    hemisphere_soup = BeautifulSoup(text_html, "html.parser")
+    def scrape_hemisphere(text_html):
+        hemisphere_soup = BeautifulSoup(text_html, "html.parser")
     try:
         title_text = hemisphere_soup.find('h2', class_ = 'title').get_text()
         image_ref = hemisphere_soup.find('a', text = 'Sample').get('href')
@@ -100,12 +99,9 @@ def scrape_hemisphere(text_html):
         title_text = None
         image_ref = None
         
-    hemispheres = {"title" : title_text, "image_url" : image_ref}
+        hemispheres = {"title" : title_text, "image_url" : image_ref}
     return hemispheres 
 
-if __name__ == '__main__' : 
-    print(scrape_all())
-            
-
-
-
+    if __name__ == '__main__' : 
+        print(scrape_all())
+           
