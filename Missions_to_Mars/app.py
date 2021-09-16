@@ -26,7 +26,7 @@ def scrape():
     mars_data.update({}, mars_data, upsert=True)
     return redirect("/", code=302)
 
-
+#end scrape
 
 if __name__ == "__main__":
     app.run()
